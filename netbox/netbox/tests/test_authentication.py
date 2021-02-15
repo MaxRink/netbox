@@ -167,6 +167,88 @@ class ExternalAuthenticationTestCase(TestCase):
         self.assertEqual(int(self.client.session.get('_auth_user_id')), new_user.pk, msg='Authentication failed')
         self.assertTrue(new_user.has_perms(['dcim.add_site', 'dcim.change_site']))
 
+    @override_settings(
+        REMOTE_AUTH_ENABLED=True,
+        REMOTE_AUTH_AUTO_CREATE_USER=True,
+        REMOTE_AUTH_GROUP_SYNC_ENABLED=True,
+        LOGIN_REQUIRED=True
+    )
+    def test_remote_auth_remote_groups_default(self):
+        """
+        Test enabling remote authentication with group sync enabled with the default configuration.
+        """
+        headers = {
+            'HTTP_REMOTE_USER': 'remoteuser2',
+            'HTTP_REMOTE_USER_GROUP': 'Group 1|Group 2',
+        }
+
+        self.assertTrue(settings.REMOTE_AUTH_ENABLED)
+        self.assertTrue(settings.REMOTE_AUTH_AUTO_CREATE_USER)
+        self.assertTrue(settings.REMOTE_AUTH_GROUP_SYNC_ENABLED)
+        self.assertEqual(settings.REMOTE_AUTH_HEADER, 'HTTP_REMOTE_USER')
+        self.assertEqual(settings.REMOTE_AUTH_GROUP_HEADER , 'HTTP_REMOTE_USER_GROUP')
+        self.assertEqual(settings.REMOTE_AUTH_GROUP_SEPERATOR  , '|')
+
+        # Create required groups
+        groups = (
+            Group(name='Group 1'),
+            Group(name='Group 2'),
+            Group(name='Group 3'),
+        )
+        Group.objects.bulk_create(groups)
+
+        response = self.client.get(reverse('home'), follow=True, **headers)
+        self.assertEqual(response.status_code, 200)
+
+        new_user = User.objects.get(username='remoteuser2')
+        self.assertEqual(int(self.client.session.get('_auth_user_id')), new_user.pk, msg='Authentication failed')
+        self.assertListEqual(
+            [groups[0], groups[1]],
+            list(new_user.groups.all())
+        )
+
+    @override_settings(
+        REMOTE_AUTH_ENABLED=True,
+        REMOTE_AUTH_AUTO_CREATE_USER=True,
+        REMOTE_AUTH_GROUP_SYNC_ENABLED=True,
+        REMOTE_AUTH_HEADER='HTTP_FOO',
+        REMOTE_AUTH_GROUP_HEADER='HTTP_BAR',
+        LOGIN_REQUIRED=True
+    )
+    def test_remote_auth_remote_groups_custom_header(self):
+        """
+        Test enabling remote authentication with group sync enabled with the default configuration.
+        """
+        headers = {
+            'HTTP_FOO': 'remoteuser2',
+            'HTTP_BAR': 'Group 1|Group 2',
+        }
+
+        self.assertTrue(settings.REMOTE_AUTH_ENABLED)
+        self.assertTrue(settings.REMOTE_AUTH_AUTO_CREATE_USER)
+        self.assertTrue(settings.REMOTE_AUTH_GROUP_SYNC_ENABLED)
+        self.assertEqual(settings.REMOTE_AUTH_HEADER, 'HTTP_FOO')
+        self.assertEqual(settings.REMOTE_AUTH_GROUP_HEADER , 'HTTP_BAR')
+        self.assertEqual(settings.REMOTE_AUTH_GROUP_SEPERATOR  , '|')
+
+        # Create required groups
+        groups = (
+            Group(name='Group 1'),
+            Group(name='Group 2'),
+            Group(name='Group 3'),
+        )
+        Group.objects.bulk_create(groups)
+
+        response = self.client.get(reverse('home'), follow=True, **headers)
+        self.assertEqual(response.status_code, 200)
+
+        new_user = User.objects.get(username='remoteuser2')
+        self.assertEqual(int(self.client.session.get('_auth_user_id')), new_user.pk, msg='Authentication failed')
+        self.assertListEqual(
+            [groups[0], groups[1]],
+            list(new_user.groups.all())
+        )
+
 
 class ObjectPermissionAPIViewTestCase(TestCase):
     client_class = APIClient
