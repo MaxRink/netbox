@@ -58,7 +58,8 @@ class ExternalAuthenticationTestCase(TestCase):
 
         response = self.client.get(reverse('home'), follow=True, **headers)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(int(self.client.session.get('_auth_user_id')), self.user.pk, msg='Authentication failed')
+        self.assertEqual(int(self.client.session.get(
+            '_auth_user_id')), self.user.pk, msg='Authentication failed')
 
     @override_settings(
         REMOTE_AUTH_ENABLED=True,
@@ -78,7 +79,8 @@ class ExternalAuthenticationTestCase(TestCase):
 
         response = self.client.get(reverse('home'), follow=True, **headers)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(int(self.client.session.get('_auth_user_id')), self.user.pk, msg='Authentication failed')
+        self.assertEqual(int(self.client.session.get(
+            '_auth_user_id')), self.user.pk, msg='Authentication failed')
 
     @override_settings(
         REMOTE_AUTH_ENABLED=True,
@@ -102,7 +104,8 @@ class ExternalAuthenticationTestCase(TestCase):
 
         # Local user should have been automatically created
         new_user = User.objects.get(username='remoteuser2')
-        self.assertEqual(int(self.client.session.get('_auth_user_id')), new_user.pk, msg='Authentication failed')
+        self.assertEqual(int(self.client.session.get(
+            '_auth_user_id')), new_user.pk, msg='Authentication failed')
 
     @override_settings(
         REMOTE_AUTH_ENABLED=True,
@@ -121,7 +124,8 @@ class ExternalAuthenticationTestCase(TestCase):
         self.assertTrue(settings.REMOTE_AUTH_ENABLED)
         self.assertTrue(settings.REMOTE_AUTH_AUTO_CREATE_USER)
         self.assertEqual(settings.REMOTE_AUTH_HEADER, 'HTTP_REMOTE_USER')
-        self.assertEqual(settings.REMOTE_AUTH_DEFAULT_GROUPS, ['Group 1', 'Group 2'])
+        self.assertEqual(settings.REMOTE_AUTH_DEFAULT_GROUPS,
+                         ['Group 1', 'Group 2'])
 
         # Create required groups
         groups = (
@@ -135,7 +139,8 @@ class ExternalAuthenticationTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         new_user = User.objects.get(username='remoteuser2')
-        self.assertEqual(int(self.client.session.get('_auth_user_id')), new_user.pk, msg='Authentication failed')
+        self.assertEqual(int(self.client.session.get(
+            '_auth_user_id')), new_user.pk, msg='Authentication failed')
         self.assertListEqual(
             [groups[0], groups[1]],
             list(new_user.groups.all())
@@ -144,7 +149,8 @@ class ExternalAuthenticationTestCase(TestCase):
     @override_settings(
         REMOTE_AUTH_ENABLED=True,
         REMOTE_AUTH_AUTO_CREATE_USER=True,
-        REMOTE_AUTH_DEFAULT_PERMISSIONS={'dcim.add_site': None, 'dcim.change_site': None},
+        REMOTE_AUTH_DEFAULT_PERMISSIONS={
+            'dcim.add_site': None, 'dcim.change_site': None},
         LOGIN_REQUIRED=True
     )
     def test_remote_auth_default_permissions(self):
@@ -158,14 +164,17 @@ class ExternalAuthenticationTestCase(TestCase):
         self.assertTrue(settings.REMOTE_AUTH_ENABLED)
         self.assertTrue(settings.REMOTE_AUTH_AUTO_CREATE_USER)
         self.assertEqual(settings.REMOTE_AUTH_HEADER, 'HTTP_REMOTE_USER')
-        self.assertEqual(settings.REMOTE_AUTH_DEFAULT_PERMISSIONS, {'dcim.add_site': None, 'dcim.change_site': None})
+        self.assertEqual(settings.REMOTE_AUTH_DEFAULT_PERMISSIONS, {
+                         'dcim.add_site': None, 'dcim.change_site': None})
 
         response = self.client.get(reverse('home'), follow=True, **headers)
         self.assertEqual(response.status_code, 200)
 
         new_user = User.objects.get(username='remoteuser2')
-        self.assertEqual(int(self.client.session.get('_auth_user_id')), new_user.pk, msg='Authentication failed')
-        self.assertTrue(new_user.has_perms(['dcim.add_site', 'dcim.change_site']))
+        self.assertEqual(int(self.client.session.get(
+            '_auth_user_id')), new_user.pk, msg='Authentication failed')
+        self.assertTrue(new_user.has_perms(
+            ['dcim.add_site', 'dcim.change_site']))
 
     @override_settings(
         REMOTE_AUTH_ENABLED=True,
@@ -186,8 +195,9 @@ class ExternalAuthenticationTestCase(TestCase):
         self.assertTrue(settings.REMOTE_AUTH_AUTO_CREATE_USER)
         self.assertTrue(settings.REMOTE_AUTH_GROUP_SYNC_ENABLED)
         self.assertEqual(settings.REMOTE_AUTH_HEADER, 'HTTP_REMOTE_USER')
-        self.assertEqual(settings.REMOTE_AUTH_GROUP_HEADER , 'HTTP_REMOTE_USER_GROUP')
-        self.assertEqual(settings.REMOTE_AUTH_GROUP_SEPERATOR  , '|')
+        self.assertEqual(settings.REMOTE_AUTH_GROUP_HEADER,
+                         'HTTP_REMOTE_USER_GROUP')
+        self.assertEqual(settings.REMOTE_AUTH_GROUP_SEPERATOR, '|')
 
         # Create required groups
         groups = (
@@ -201,7 +211,8 @@ class ExternalAuthenticationTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         new_user = User.objects.get(username='remoteuser2')
-        self.assertEqual(int(self.client.session.get('_auth_user_id')), new_user.pk, msg='Authentication failed')
+        self.assertEqual(int(self.client.session.get(
+            '_auth_user_id')), new_user.pk, msg='Authentication failed')
         self.assertListEqual(
             [groups[0], groups[1]],
             list(new_user.groups.all())
@@ -228,8 +239,8 @@ class ExternalAuthenticationTestCase(TestCase):
         self.assertTrue(settings.REMOTE_AUTH_AUTO_CREATE_USER)
         self.assertTrue(settings.REMOTE_AUTH_GROUP_SYNC_ENABLED)
         self.assertEqual(settings.REMOTE_AUTH_HEADER, 'HTTP_FOO')
-        self.assertEqual(settings.REMOTE_AUTH_GROUP_HEADER , 'HTTP_BAR')
-        self.assertEqual(settings.REMOTE_AUTH_GROUP_SEPERATOR  , '|')
+        self.assertEqual(settings.REMOTE_AUTH_GROUP_HEADER, 'HTTP_BAR')
+        self.assertEqual(settings.REMOTE_AUTH_GROUP_SEPERATOR, '|')
 
         # Create required groups
         groups = (
@@ -243,7 +254,8 @@ class ExternalAuthenticationTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         new_user = User.objects.get(username='remoteuser2')
-        self.assertEqual(int(self.client.session.get('_auth_user_id')), new_user.pk, msg='Authentication failed')
+        self.assertEqual(int(self.client.session.get(
+            '_auth_user_id')), new_user.pk, msg='Authentication failed')
         self.assertListEqual(
             [groups[0], groups[1]],
             list(new_user.groups.all())
@@ -288,7 +300,8 @@ class ObjectPermissionAPIViewTestCase(TestCase):
     def test_get_object(self):
 
         # Attempt to retrieve object without permission
-        url = reverse('ipam-api:prefix-detail', kwargs={'pk': self.prefixes[0].pk})
+        url = reverse('ipam-api:prefix-detail',
+                      kwargs={'pk': self.prefixes[0].pk})
         response = self.client.get(url, **self.header)
         self.assertEqual(response.status_code, 403)
 
@@ -303,12 +316,14 @@ class ObjectPermissionAPIViewTestCase(TestCase):
         obj_perm.object_types.add(ContentType.objects.get_for_model(Prefix))
 
         # Retrieve permitted object
-        url = reverse('ipam-api:prefix-detail', kwargs={'pk': self.prefixes[0].pk})
+        url = reverse('ipam-api:prefix-detail',
+                      kwargs={'pk': self.prefixes[0].pk})
         response = self.client.get(url, **self.header)
         self.assertEqual(response.status_code, 200)
 
         # Attempt to retrieve non-permitted object
-        url = reverse('ipam-api:prefix-detail', kwargs={'pk': self.prefixes[3].pk})
+        url = reverse('ipam-api:prefix-detail',
+                      kwargs={'pk': self.prefixes[3].pk})
         response = self.client.get(url, **self.header)
         self.assertEqual(response.status_code, 404)
 
@@ -374,7 +389,8 @@ class ObjectPermissionAPIViewTestCase(TestCase):
 
         # Attempt to edit an object without permission
         data = {'site': self.sites[0].pk}
-        url = reverse('ipam-api:prefix-detail', kwargs={'pk': self.prefixes[0].pk})
+        url = reverse('ipam-api:prefix-detail',
+                      kwargs={'pk': self.prefixes[0].pk})
         response = self.client.patch(url, data, format='json', **self.header)
         self.assertEqual(response.status_code, 403)
 
@@ -390,19 +406,22 @@ class ObjectPermissionAPIViewTestCase(TestCase):
 
         # Attempt to edit a non-permitted object
         data = {'site': self.sites[0].pk}
-        url = reverse('ipam-api:prefix-detail', kwargs={'pk': self.prefixes[3].pk})
+        url = reverse('ipam-api:prefix-detail',
+                      kwargs={'pk': self.prefixes[3].pk})
         response = self.client.patch(url, data, format='json', **self.header)
         self.assertEqual(response.status_code, 404)
 
         # Edit a permitted object
         data['status'] = 'reserved'
-        url = reverse('ipam-api:prefix-detail', kwargs={'pk': self.prefixes[0].pk})
+        url = reverse('ipam-api:prefix-detail',
+                      kwargs={'pk': self.prefixes[0].pk})
         response = self.client.patch(url, data, format='json', **self.header)
         self.assertEqual(response.status_code, 200)
 
         # Attempt to modify a permitted object to a non-permitted object
         data['site'] = self.sites[1].pk
-        url = reverse('ipam-api:prefix-detail', kwargs={'pk': self.prefixes[0].pk})
+        url = reverse('ipam-api:prefix-detail',
+                      kwargs={'pk': self.prefixes[0].pk})
         response = self.client.patch(url, data, format='json', **self.header)
         self.assertEqual(response.status_code, 403)
 
@@ -410,7 +429,8 @@ class ObjectPermissionAPIViewTestCase(TestCase):
     def test_delete_object(self):
 
         # Attempt to delete an object without permission
-        url = reverse('ipam-api:prefix-detail', kwargs={'pk': self.prefixes[0].pk})
+        url = reverse('ipam-api:prefix-detail',
+                      kwargs={'pk': self.prefixes[0].pk})
         response = self.client.delete(url, format='json', **self.header)
         self.assertEqual(response.status_code, 403)
 
@@ -425,11 +445,13 @@ class ObjectPermissionAPIViewTestCase(TestCase):
         obj_perm.object_types.add(ContentType.objects.get_for_model(Prefix))
 
         # Attempt to delete a non-permitted object
-        url = reverse('ipam-api:prefix-detail', kwargs={'pk': self.prefixes[3].pk})
+        url = reverse('ipam-api:prefix-detail',
+                      kwargs={'pk': self.prefixes[3].pk})
         response = self.client.delete(url, format='json', **self.header)
         self.assertEqual(response.status_code, 404)
 
         # Delete a permitted object
-        url = reverse('ipam-api:prefix-detail', kwargs={'pk': self.prefixes[0].pk})
+        url = reverse('ipam-api:prefix-detail',
+                      kwargs={'pk': self.prefixes[0].pk})
         response = self.client.delete(url, format='json', **self.header)
         self.assertEqual(response.status_code, 204)
